@@ -17,6 +17,13 @@ git clone <https://github.com/Python-Labs-SPBPU-fall-2024/product_tracking_bot.g
 cd <product_tracking_bot>
 pip install -r requirements.txt
 ```
+#### Конфигурация 
+Перед запуском бота необходимо создать файл config.py и указать в нем токен вашего бота, полученный от BotFather в Telegram
+```bash
+# config.py
+token = "YOUR_BOT_TOKEN_HERE"
+```
+
 
 ### Реализуемые функции
 1. **Телеграм-бот**: Основной интерфейс взаимодействия с пользователем.
