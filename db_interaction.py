@@ -22,28 +22,29 @@ sqlite3.register_adapter(date, adapt_date_iso)
 sqlite3.register_converter("timestamp", convert_datetime)
 sqlite3.register_converter("date", convert_date)
 
+class DBInteractionExept(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return "DB interaction has problem: " ++ self.message
+
 
 class DataBaseConnect:
     """
        Класс для работы с базой данных SQLite, включающий методы для создания таблиц, вставки данных и выполнения запросов.
     """
 
-    # Поля сonn - соединение с бд.
-    def create_connection(self):
-        self.conn = sqlite3.connect('purchases.db', detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-        self.cursor = self.conn.cursor()
-        print("Connection opened!")
-
-
     def init_db(self) -> None:
         """
-                Создает таблицы в базе данных, если они не существуют.
+            Создает таблицы в базе данных, если они не существуют.
         """
         conn = sqlite3.connect('purchases.db', detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         cursor = conn.cursor()
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS User(
-        User_id INTEGER   PRIMARY KEY,
+        User_id INTEGER PRIMARY KEY,
         User_tg_name VARCHAR(32) NOT NULL)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS User_product(
@@ -66,14 +67,16 @@ class DataBaseConnect:
         conn.commit()
         conn.close()
         print("Tables created!")
-        print("Connection closed!")
+
 
     def get_all_product_for_user(self, user_tg_id) -> list:
         """
-                Возвращает список всех продуктов, отслеживаемых пользователем.
+               Возвращает список всех продуктов, отслеживаемых пользователем.
 
-                :param user_tg_id: Telegram ID пользователя.
-                :return: Список продуктов.
+               :param user_tg_id: Telegram ID пользователя.
+               :type user_tg_id: str
+               :return: Список продуктов.
+               :rtype: list
         """
         conn = sqlite3.connect('purchases.db', detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         cursor = conn.cursor()
@@ -84,18 +87,23 @@ class DataBaseConnect:
         Inner Join Product
             on User_product.Product_in_id = Product.Product_sku
                 where user_tg_name = ?''', (user_tg_id,))
-        result = list(zip(*cursor.fetchall()))
+        result = list(map(lambda x: x[0], cursor.fetchall()))
+        print(result)
         conn.commit()
         conn.close()
+
         return result
 
     def start_tracking_for_user(self, user_tg_id, product_data: parser.PriceInfo):
         """
-        Установка связи между продуктом и пользователем.
-        Если пользователь или продукт не существуют, они добавляются в базу данных.
+            Устанавливает связь между продуктом и пользователем.
+            Если пользователь или продукт не существуют, они добавляются в базу данных.
 
-        :param user_tg_id: Telegram ID пользователя.
-        :param product_data: Данные о продукте (объект PriceInfo).
+            :param user_tg_id: Telegram ID пользователя.
+            :type user_tg_id: str
+            :param product_data: Данные о продукте (объект PriceInfo).
+            :type product_data: parser.PriceInfo
+            :return: None
         """
         conn = sqlite3.connect('purchases.db', detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         cursor = conn.cursor()
@@ -103,7 +111,7 @@ class DataBaseConnect:
         # Проверка наличия пользователя
         cursor.execute('SELECT User_id FROM User WHERE User_tg_name = ?', (user_tg_id,))
         info_user = cursor.fetchone()
-        print(info_user)
+
         if info_user is None:
             cursor.execute('INSERT INTO User (User_tg_name) VALUES (?)', (user_tg_id,))
             conn.commit()
@@ -117,26 +125,30 @@ class DataBaseConnect:
             conn.commit()
             cursor.execute('SELECT Product_sku FROM Product WHERE Product_sku = ?', (int(product_data.sku),))
             info_product = cursor.fetchone()
-        print(info_product)
+
         # Проверка наличия связи между пользователем и продуктом
         info_bind = cursor.execute('SELECT * FROM User_product WHERE Product_in_id = ? AND User_in_id = ?',
                             (info_product[0], info_user[0]))
         info_bind = cursor.fetchone()
-        print(info_user[0], info_product[0])
+
         if info_bind is None:
             cursor.execute('INSERT INTO User_product (User_in_id, Product_in_id) VALUES (?, ?)',
                                 (info_user[0], info_product[0]))
-        print(info_bind)
+
         conn.commit()
         conn.close()
 
 
     def insert_cost(self, product_data: parser.PriceInfo):
         """
-           Вставляет данные о стоимости продукта в таблицу Product_cost.
+        Вставляет данные о стоимости продукта в таблицу Product_cost.
 
-           :param product_data: Данные о продукте (объект PriceInfo).
+        :param product_data: Данные о продукте (объект PriceInfo).
+        :type product_data: parser.PriceInfo
+        :return: None
         """
+
+
         conn = sqlite3.connect('purchases.db', detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         cursor = conn.cursor()
         try:
@@ -144,10 +156,9 @@ class DataBaseConnect:
             if product_data.sku is None or product_data.price is None or product_data.time is None:
                 print("Одно или несколько значений отсутствуют!")
                 return
-            print(product_data.time)
+            #print(product_data.time)
             cursor.execute('INSERT INTO Product_cost ( Product_sku, Date, Cost) VALUES (?, ?, ?)',
                  (int(product_data.sku), product_data.time, product_data.price))
-
             conn.commit()  # Коммит транзакции
             conn.close()
         except sqlite3.OperationalError:
@@ -157,11 +168,46 @@ class DataBaseConnect:
             conn.commit()
             conn.close()
 
-    def delete_data(self):
+    def delete_data(self, user_tg_id, product_data: parser.PriceInfo):
         """
-            Заглушка для метода удаления данных. Не реализован
+            Удаляет продукт для данного пользователя из базы данных. Если данный продукт отслеживал только
+            один пользователь, то продукт удаляется из базы данных насовсем.
+
+            :param user_tg_id: Идентификатор пользователя в Telegram.
+            :type user_tg_id: str
+            :param product_data: Объект, содержащий информацию о продукте.
+            :type product_data: parser.PriceInfo
+            :raises DBInteractionExept: Если продукт не отслеживается данным пользователем.
+            :return: None
         """
-        pass
+        conn = sqlite3.connect('purchases.db', detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+        cursor = conn.cursor()
+
+        # Проверка 1. Смотрим на то отлеживает ли наш пользовтель этот товар
+        if int(product_data.sku) not in self.get_all_product_for_user(user_tg_id):
+            raise DBInteractionExept("No product for such user")
+        else:
+            cursor.execute('SELECT COUNT(*) FROM User'
+                           ' inner join user_product on user_id = user_product.user_in_id'
+                           ' inner join product on user_product.product_in_id = product_sku'
+                           ' where Product_sku = ?', (int(product_data.sku),))
+            res = cursor.fetchone()
+            # Проверка 2. Смотрим на то, сколько пользовтелей отслеживает данный товар
+            if (res[0] == 1):
+                # Если только один, который и хочет удалить данный товар, то очиащем полностью
+
+                # Удалили из таблицы связей
+                cursor.execute('DELETE FROM  User_product where Product_in_id = ?', (int(product_data.sku),))
+                # Удалили из таблицы продуктов
+                cursor.execute('DELETE FROM  Product where Product_sku = ?', (int(product_data.sku),))
+                # Удалили из таблицы цен
+                cursor.execute('DELETE FROM  Product_cost where Product_sku = ?', (int(product_data.sku),))
+            else:
+                # Если еще несколько, то оставляем основые записи, удаляем только строки связывающей таблицы.
+                cursor.execute('DELETE FROM  User_product where Product_in_id = ? and User_in_id = (select User_id from '
+                               'User where User_tg_name = ?)', (int(product_data.sku),user_tg_id))
+        conn.commit()
+        conn.close()
 
     def drop_tables(self):
         """
@@ -170,21 +216,22 @@ class DataBaseConnect:
         conn = sqlite3.connect('purchases.db', detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         cursor = conn.cursor()
 
-        cursor.execute('''DROP TABLE User''')
-        cursor.execute('''DROP TABLE User_product''')
-        cursor.execute('''DROP TABLE Product''')
-        cursor.execute('''DROP TABLE Product_cost''')
-        print("Tables Dropped!")
+        cursor.execute('''DROP TABLE IF EXISTS User''')
+        cursor.execute('''DROP TABLE IF EXISTS User_product''')
+        cursor.execute('''DROP TABLE IF EXISTS Product''')
+        cursor.execute('''DROP TABLE IF EXISTS Product_cost''')
 
         conn.commit()
         conn.close()
 
     def get_cost_by_sku(self, sku):
         """
-            Возвращает данные о стоимости продукта по его арткулу.
+               Возвращает данные о стоимости продукта по его артикулу.
 
-            :param sku: Артикул продукта.
-            :return: Данные о стоимости продукта.
+               :param sku: Артикул продукта.
+               :type sku: int
+               :return: Данные о стоимости продукта.
+               :rtype: list
         """
         conn = sqlite3.connect('purchases.db', detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         cursor = conn.cursor()
@@ -194,9 +241,6 @@ class DataBaseConnect:
             print("Такой таблицы не существует!")
             return
         result = cursor.fetchall()
-        print("Получил!:", result)
         conn.commit()
         conn.close()
         return result
-
-
