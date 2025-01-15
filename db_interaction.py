@@ -23,11 +23,11 @@ sqlite3.register_converter("timestamp", convert_datetime)
 sqlite3.register_converter("date", convert_date)
 
 class DBInteractionExept(Exception):
-    def init(self, message):
+    def __init__(self, message):
         self.message = message
-        super().init(self.message)
+        super().__init__(self.message)
 
-    def str(self):
+    def __str__(self):
         return "DB interaction has problem: " ++ self.message
 
 
