@@ -79,12 +79,12 @@ class DataBaseConnect:
 
     def get_all_product_for_user(self, user_tg_id) -> list:
         """
-               Возвращает список всех продуктов, отслеживаемых пользователем.
+            Возвращает список всех продуктов, отслеживаемых пользователем.
 
-               :param user_tg_id: Telegram ID пользователя.
-               :type user_tg_id: str
-               :return: Список продуктов.
-               :rtype: list
+            :param user_tg_id: Telegram ID пользователя.
+            :type user_tg_id: str
+            :return: Список продуктов.
+            :rtype: list
         """
 
         self.cursor.execute('''SELECT Product_sku FROM User
@@ -137,10 +137,19 @@ class DataBaseConnect:
         self.conn.commit()
 
     def insert_cost(self, product_data: parser.PriceInfo):
+<<<<<<< HEAD
         """
            Вставляет данные о стоимости продукта в таблицу Product_cost.
 
            :param product_data: Данные о продукте (объект PriceInfo).
+=======
+        """"
+            Вставляет данные о стоимости продукта в таблицу Product_cost.
+
+            :param product_data: Данные о продукте (объект PriceInfo).
+            :type product_data: parser.PriceInfo
+            :return: None
+>>>>>>> 83c62eab77342b75e31eb7b3c74181abd952d20f
         """
         try:
             # Проверка на None
