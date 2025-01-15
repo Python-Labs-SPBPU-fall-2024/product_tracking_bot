@@ -11,6 +11,10 @@
 
 В работе бот использует встроенную СУБД SQLite для хранения данных, о ценах товаров, и информации о пользователях и тех товаров, которые они отслеживают.
 
+Схема базы данных, используемой в проекте представлен ниже 
+
+ ![Alt text](https://github.com/Python-Labs-SPBPU-fall-2024/product_tracking_bot/blob/main/DB.drawio.png)
+
 ### Установка и запуск
 ```bash
 git clone <https://github.com/Python-Labs-SPBPU-fall-2024/product_tracking_bot.git>
