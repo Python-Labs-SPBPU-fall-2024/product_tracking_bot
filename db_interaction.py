@@ -137,19 +137,15 @@ class DataBaseConnect:
         self.conn.commit()
 
     def insert_cost(self, product_data: parser.PriceInfo):
-<<<<<<< HEAD
         """
            Вставляет данные о стоимости продукта в таблицу Product_cost.
 
            :param product_data: Данные о продукте (объект PriceInfo).
-=======
-        """"
             Вставляет данные о стоимости продукта в таблицу Product_cost.
 
             :param product_data: Данные о продукте (объект PriceInfo).
             :type product_data: parser.PriceInfo
             :return: None
->>>>>>> 83c62eab77342b75e31eb7b3c74181abd952d20f
         """
         try:
             # Проверка на None
