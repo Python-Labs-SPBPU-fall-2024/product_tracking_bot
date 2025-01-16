@@ -51,7 +51,7 @@ class DataBaseConnect:
 
     def init_db(self) -> None:
         """
-                Создает таблицы в базе данных, если они не существуют.
+                Создает таблицы в базе данных, если они не существуют .
         """
         self.cursor.execute('''CREATE TABLE IF NOT EXISTS User(
         User_id INTEGER   PRIMARY KEY,
