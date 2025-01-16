@@ -2,6 +2,16 @@ import sqlite3
 from datetime import datetime, date
 import parser
 
+
+class DBInteractionExept(Exception):
+    def init(self, message):
+        self.message = message
+        super().init(self.message)
+
+    def str(self):
+        return "DB interaction has problem: " ++ self.message
+
+
 # Адаптеры
 def adapt_datetime_iso(val):
     return val.isoformat()
@@ -21,14 +31,6 @@ sqlite3.register_adapter(datetime, adapt_datetime_iso)
 sqlite3.register_adapter(date, adapt_date_iso)
 sqlite3.register_converter("timestamp", convert_datetime)
 sqlite3.register_converter("date", convert_date)
-
-class DBInteractionExept(Exception):
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
-
-    def __str__(self):
-        return "DB interaction has problem: " ++ self.message
 
 
 class DataBaseConnect:
@@ -85,8 +87,8 @@ class DataBaseConnect:
             :rtype: list
         """
 
-        self.cursor.execute('''SELECT Product_sku FROM User 
-        Inner Join User_product 
+        self.cursor.execute('''SELECT Product_sku FROM User
+        Inner Join User_product
             on User.User_id= User_product.User_in_id
         Inner Join Product
             on User_product.Product_in_id = Product.Product_sku
@@ -97,16 +99,13 @@ class DataBaseConnect:
 
         return result
 
-    def start_tracking_for_user(self, user_tg_id, product_data: parser.PriceInfo):
+    def start_tracking_for_user(self, user_tg_id, product_data:parser.PriceInfo):
         """
-            Устанавливает связь между продуктом и пользователем.
-            Если пользователь или продукт не существуют, они добавляются в базу данных.
+        Установка связи между продуктом и пользователем.
+        Если пользователь или продукт не существуют, они добавляются в базу данных.
 
-            :param user_tg_id: Telegram ID пользователя.
-            :type user_tg_id: str
-            :param product_data: Данные о продукте (объект PriceInfo).
-            :type product_data: parser.PriceInfo
-            :return: None
+        :param user_tg_id: Telegram ID пользователя.
+        :param product_data: Данные о продукте (объект PriceInfo).
         """
         # Проверка наличия пользователя
         self.cursor.execute('SELECT User_id FROM User WHERE User_tg_name = ?', (user_tg_id,))
@@ -138,12 +137,19 @@ class DataBaseConnect:
         self.conn.commit()
 
     def insert_cost(self, product_data: parser.PriceInfo):
+<<<<<<< HEAD
+        """
+           Вставляет данные о стоимости продукта в таблицу Product_cost.
+
+           :param product_data: Данные о продукте (объект PriceInfo).
+=======
         """"
             Вставляет данные о стоимости продукта в таблицу Product_cost.
 
             :param product_data: Данные о продукте (объект PriceInfo).
             :type product_data: parser.PriceInfo
             :return: None
+>>>>>>> 83c62eab77342b75e31eb7b3c74181abd952d20f
         """
         try:
             # Проверка на None
@@ -211,12 +217,10 @@ class DataBaseConnect:
 
     def get_cost_by_sku(self, sku):
         """
-               Возвращает данные о стоимости продукта по его артикулу.
+            Возвращает данные о стоимости продукта по его арткулу.
 
-               :param sku: Артикул продукта.
-               :type sku: int
-               :return: Данные о стоимости продукта.
-               :rtype: list
+            :param sku: Артикул продукта.
+            :return: Данные о стоимости продукта.
         """
         try:
             self.cursor.execute("SELECT * FROM Product_cost where Product_sku = ?", (int(sku),))

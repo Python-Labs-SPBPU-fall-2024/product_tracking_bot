@@ -66,7 +66,7 @@ class PriceParser:
         Парсинг цены товара.
 
         Returns:
-            Optional[PriceInfo]: Объект PriceInfo с информацией о цене, 
+            Optional[PriceInfo]: Объект PriceInfo с информацией о цене,
             или None в случае ошибки.
 
         Raises:
@@ -83,7 +83,7 @@ class PriceParser:
 
             # Извлекаем цену из JSON-ответа
             self.price = response.json().get('data', {}).get('products', [{}])[0].get('salePriceU', -1) // 100
-            
+
             if self.price == -1:
                 raise ValueError('Ошибка: не найдена цена товара!')
 
@@ -91,13 +91,13 @@ class PriceParser:
             return PriceInfo(sku=self.sku, price=self.price, time=self.time)
 
         except ValueError as e:
-            print(f'{e}') 
+            print(f'{e}')
         except requests.exceptions.RequestException as e:
-            print(f'Ошибка при выполнении запроса: {e}') 
+            print(f'Ошибка при выполнении запроса: {e}')
         except (IndexError, KeyError):
-            print('Ошибка: не удалось получить данные о продукте.') 
+            print('Ошибка: не удалось получить данные о продукте.')
         except Exception as e:
-            print(f'Непредвиденная ошибка: {e}') 
+            print(f'Непредвиденная ошибка: {e}')
 
         return None
 

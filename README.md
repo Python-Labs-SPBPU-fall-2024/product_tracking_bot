@@ -19,12 +19,13 @@
 ```bash
 git clone <https://github.com/Python-Labs-SPBPU-fall-2024/product_tracking_bot.git>
 cd <product_tracking_bot>
-pip install -r requirements.txt
+pip install telebot
+pip install aiohtt
 ```
 #### Конфигурация 
 Перед запуском бота необходимо создать файл config.py и указать в нем токен вашего бота, полученный от BotFather в Telegram
 ```bash
-# config.py
+
 token = "YOUR_BOT_TOKEN_HERE"
 ```
 
@@ -37,7 +38,7 @@ token = "YOUR_BOT_TOKEN_HERE"
 ### Структура проекта
 - parser.py --- функции парсинга данных о товаре с сайта Wildberries. Необходимые структуры данных для обмена информацией между модулями телеграмм-бота
 - db_interaction  --- класс, подключения к базе данных, инкапсулирующий методы записи, чтения и удаления данных в базе, хронящие данные о пользователях и товарах
-
+- bot.py --- реализация телеграмм бота
 ### Описание коммитов
 | Название  | Описание                                                                 |
 |-----------|--------------------------------------------------------------------------|
