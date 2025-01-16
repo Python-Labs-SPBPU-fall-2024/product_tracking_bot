@@ -51,7 +51,7 @@ class DataBaseConnect:
 
     def init_db(self) -> None:
         """
-                Создает таблицы в базе данных, если они не существуют .
+            Создает таблицы в базе данных, если они не существуют .
         """
         self.cursor.execute('''CREATE TABLE IF NOT EXISTS User(
         User_id INTEGER   PRIMARY KEY,
@@ -101,11 +101,11 @@ class DataBaseConnect:
 
     def start_tracking_for_user(self, user_tg_id, product_data:parser.PriceInfo):
         """
-        Установка связи между продуктом и пользователем.
-        Если пользователь или продукт не существуют, они добавляются в базу данных.
+            Установка связи между продуктом и пользователем.
+            Если пользователь или продукт не существуют, они добавляются в базу данных.
 
-        :param user_tg_id: Telegram ID пользователя.
-        :param product_data: Данные о продукте (объект PriceInfo).
+            :param user_tg_id: Telegram ID пользователя.
+            :param product_data: Данные о продукте (объект PriceInfo).
         """
         # Проверка наличия пользователя
         self.cursor.execute('SELECT User_id FROM User WHERE User_tg_name = ?', (user_tg_id,))
@@ -140,10 +140,8 @@ class DataBaseConnect:
         """
            Вставляет данные о стоимости продукта в таблицу Product_cost.
 
-           :param product_data: Данные о продукте (объект PriceInfo).
-            Вставляет данные о стоимости продукта в таблицу Product_cost.
-
             :param product_data: Данные о продукте (объект PriceInfo).
+            Вставляет данные о стоимости продукта в таблицу Product_cost.
             :type product_data: parser.PriceInfo
             :return: None
         """
